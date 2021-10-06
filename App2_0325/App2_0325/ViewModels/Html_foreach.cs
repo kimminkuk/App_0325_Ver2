@@ -13,11 +13,18 @@ using App2_0325.Models;
 
 namespace App2_0325.ViewModels
 {
+
     public class Global_days
     {
         public const int _days = 60;
         public const int divide_days = 10;
         public const int _days_ex = 120;
+    }
+
+    public class ConstantValue
+    {
+        public const int stock_count = 2462;
+
     }
 
     public struct stock_
@@ -38,6 +45,15 @@ namespace App2_0325.ViewModels
         public int s_dlp_int;
     }
 
+    public struct Quant_Ver_1
+    {
+        public int s_CODE;
+        public int s_MARKETCAP;
+        public int s_PER;
+        public int s_PCR;
+        public int s_PBR;
+    }
+
     class Html_foreach
     {
         public stock_ html_get_event(stock_ get)
@@ -49,6 +65,7 @@ namespace App2_0325.ViewModels
     }
     public class html_addr : INotifyPropertyChanged
     {
+
         public html_addr()
         {
 
@@ -57,7 +74,7 @@ namespace App2_0325.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void NotifyPropertyChanged(string propertyName)
         {
-            if(this.PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
@@ -81,7 +98,7 @@ namespace App2_0325.ViewModels
             //https://finance.naver.com/item/main.nhn?code=005380# 
             //https://finance.naver.com/item/main.nhn?code=005380
             //https://ssl.pstatic.net/imgfinance/chart/item/candle/day/005380.png
-            var html="";
+            var html = "";
 
             switch (kinds)
             {
@@ -253,6 +270,56 @@ namespace App2_0325.ViewModels
                 }
             }
             return put;
+        }
+
+        //https://finance.naver.com/item/sise.naver?code=
+
+        // STEP 1) https://finance.naver.com/item/sise.naver?code=005380
+        //         Parsing loop in MarketCap
+        // 이거.. Qsort 안해도.. naver에서 제공해주는거 사용하자
+        // 그러면.. etf랑 스펙주가 너무 많아짐 (의도하지 않음 이런거)
+
+        // STEP 2) Qsort MarketCap
+        //         
+
+        // STEP 3) https://finance.naver.com/item/main.naver?code=005380
+        //         Parsing loop in PER
+        public string Parsing_Quent_Ver_1(float N1, float N2, float N3, float N4)
+        {
+            string put = "";
+            int[] temp = new int[ConstantValue.stock_count];
+            Quant_Ver_1[] quant_Ver_1 = new Quant_Ver_1[ConstantValue.stock_count];
+            sangjang sj = new sangjang();
+            
+            //Method Set
+            MethodClass call_method = new MethodClass();
+
+            // STEP 1)
+            for (int i = 0; i < ConstantValue.stock_count; i++)
+            {
+                var html = @"https://finance.naver.com/item/sise.naver?code=";
+                html = html + sj.company[i].ToString();
+
+                HtmlAgilityPack.HtmlWeb web = new HtmlAgilityPack.HtmlWeb();
+                var HtmlDoc = web.Load(html);
+
+                HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
+
+                if (htmlNode == null)
+                {
+                    return "err";
+                }
+
+                quant_Ver_1[i].s_CODE = sj.company[i];
+
+                var data_marketcap = htmlNode.SelectSingleNode("td[1]").InnerText;
+                quant_Ver_1[i].s_MARKETCAP = call_method.CnvStringToInt(data_marketcap);
+                temp[i] = quant_Ver_1[i].s_MARKETCAP;
+            }
+
+            //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
+            Array.Sort<Quant_Ver_1>(quant_Ver_1, (x, y) => x.s_MARKETCAP.CompareTo(y.s_MARKETCAP));
+            return put;            
         }
     }
 }

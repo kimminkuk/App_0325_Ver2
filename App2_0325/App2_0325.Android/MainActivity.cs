@@ -9,7 +9,7 @@ using Android.OS;
 
 namespace App2_0325.Droid
 {
-    [Activity(Label = "종가예측", Icon = "@drawable/jonga", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "퀀텀투자", Icon = "@drawable/jonga", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
