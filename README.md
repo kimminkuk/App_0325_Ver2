@@ -1,5 +1,5 @@
 # App2_0325_Ver2
-can do! Reading Quant Investing Books and Turning Investing Methods into Apps
+Reading 'can do! Quant Investing Books' and Turning Investing Methods into Apps
 
 # Update Plan #
 1. Market Cap Serch
