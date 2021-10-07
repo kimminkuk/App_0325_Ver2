@@ -276,8 +276,7 @@ namespace App2_0325.ViewModels
 
         // STEP 1) https://finance.naver.com/item/sise.naver?code=005380
         //         Parsing loop in MarketCap
-        // 이거.. Qsort 안해도.. naver에서 제공해주는거 사용하자
-        // 그러면.. etf랑 스펙주가 너무 많아짐 (의도하지 않음 이런거)
+        //         Array.Sort 사용 
 
         // STEP 2) Qsort MarketCap
         //         
