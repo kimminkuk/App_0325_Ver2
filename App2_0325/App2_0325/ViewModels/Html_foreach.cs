@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -13,20 +14,15 @@ using App2_0325.Models;
 
 namespace App2_0325.ViewModels
 {
-    public class CompareList : IComparer
+    public class CompareList
     {
         public CompareList() {}
         public int Compare(object Obj1, object Obj2)
         {
-            Quant_Ver_1 n1 = Obj1 as Quant_Ver_1;
-            Quant_Ver_1 n2 = Obj2 as Quant_Ver_1;
+            Quant_Ver_1 Q1 = (Quant_Ver_1)Obj1;
+            Quant_Ver_1 Q2 = (Quant_Ver_1)Obj2;
 
-            if( (n1 == null)  || (n2 == null)) 
-            {
-                throw new ApplicationException("Search Quant_Ver_1 Error");
-            }
-
-            return n1.s_PER.CompareTo(n2.s_PER);
+            return Q1.s_PER.CompareTo(Q1.s_PER);
         }
     }
 
@@ -71,7 +67,7 @@ namespace App2_0325.ViewModels
         public string s_NAME;
     }
 
-    public class C_Quant_Ver_1 : IComparable
+    public class C_Quant_Ver_1
     {
         public int s_CODE;
         public int s_MARKETCAP;
@@ -79,15 +75,64 @@ namespace App2_0325.ViewModels
         public int s_PCR;
         public int s_PBR;
         public string s_NAME;
-
-        public int CompareTo_PER(object obj)
+        
+        public C_Quant_Ver_1(int s_CODE, int s_MARKETCAP, int s_PER, int s_PCR, int s_PBR, string s_NAME)
         {
-            C_Quant_Ver_1 CQ = obj as C_Quant_Ver_1;
-            if(CQ == null)
+            this.s_CODE = s_CODE;
+            this.s_MARKETCAP = s_MARKETCAP;
+            this.s_PER = s_PER;
+            this.s_PCR = s_PCR;
+            this.s_PBR = s_PBR;
+            this.s_NAME = s_NAME;
+        }
+        public int CompareTo(object obj)
+        {
+            C_Quant_Ver_1 target = (C_Quant_Ver_1)obj;
+            if(this.s_MARKETCAP > target.s_MARKETCAP)
             {
-                throw new ApplicationException("Search CQ Error");
+                return 1;
+            } 
+            else if (this.s_MARKETCAP == target.s_MARKETCAP)
+            {
+                return 0;
             }
-            return s_PER.CompareTo(CQ.s_PER);
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    public class PerSortClass : IComparer
+    {
+        int IComparer.Compare(object x, object y)
+        {
+            C_Quant_Ver_1 left = x as C_Quant_Ver_1;
+            C_Quant_Ver_1 right = y as C_Quant_Ver_1;
+
+            return left.s_PER.CompareTo(right.s_PER);
+        }
+    }
+
+    public class PcrSortClass : IComparer
+    {
+        int IComparer.Compare(object x, object y)
+        {
+            C_Quant_Ver_1 left = x as C_Quant_Ver_1;
+            C_Quant_Ver_1 right = y as C_Quant_Ver_1;
+
+            return left.s_PCR.CompareTo(right.s_PCR);
+        }
+    }
+
+    public class PbrSortClass : IComparer
+    {
+        int IComparer.Compare(object x, object y)
+        {
+            C_Quant_Ver_1 left = x as C_Quant_Ver_1;
+            C_Quant_Ver_1 right = y as C_Quant_Ver_1;
+
+            return left.s_PBR.CompareTo(right.s_PBR);
         }
     }
 
@@ -329,7 +374,7 @@ namespace App2_0325.ViewModels
         {
             string put = "";
             int MarketCap_Length = 615;
-            int PER_Length = (MarketCap_Length / 10) * 2.5;
+            int PER_Length = (int)((MarketCap_Length / 10) * 2.5);
             int[] temp = new int[ConstantValue.stock_count];
             Quant_Ver_1[] quant_Ver_1 = new Quant_Ver_1[ConstantValue.stock_count];
             sangjang sj = new sangjang();
@@ -339,9 +384,6 @@ namespace App2_0325.ViewModels
             
             //Compare Class
             CompareList compareList = new CompareList();
-            
-            //Test for Sort of Class
-            C_Quant_Ver_1[] CQ = new C_Quant_Ver_1[ConstantValue.stock_count];
 
             // STEP 1)
             for (int i = 0; i < ConstantValue.stock_count; i++)
@@ -353,7 +395,7 @@ namespace App2_0325.ViewModels
                 var HtmlDoc = web.Load(html);
 
                 HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
-                htmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
+                HtmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
                 if (htmlNode == null || htmlNode_PER == null)
                 {
                     return "err";
@@ -368,16 +410,14 @@ namespace App2_0325.ViewModels
                 var data_per = htmlNode_PER.SelectSingleNode("td[1]").InnerText;
                 if("N/A".Equals(data_per))
                 {
-                    data_per = 1000;
+                    
+                    data_per = "1000";
                 }
                 quant_Ver_1[i].s_PER = call_method.CnvStringToInt(data_per);
             }
 
             //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
             Array.Sort<Quant_Ver_1>(quant_Ver_1, (x, y) => x.s_MARKETCAP.CompareTo(y.s_MARKETCAP));
-
-            /* (1) */    
-            Array.Sort<Quant_Ver_1>(quant_Ver_1, ConstantValue.stock_count - MarketCap_Length, MarketCap_Length, compareList);
         
             int initLength = ConstantValue.stock_count-MarketCap_Length;
             for(int i = initLength; i < initLength + PER_Length; i++)
@@ -386,6 +426,86 @@ namespace App2_0325.ViewModels
             }
 
             return put;            
+        }
+
+        public string Parsing_C_Quent_Ver_1(float N1, float N2, float N3, float N4)
+        {
+            string put = "";
+            int MarketCap_Length = 615;
+            int PER_Length = (int)((MarketCap_Length / 10) * 2.5);
+
+            //C_Quant_Ver_1[] quant_Ver_1 = new C_Quant_Ver_1[ConstantValue.stock_count];
+            sangjang sj = new sangjang();
+
+            //Method Set
+            MethodClass call_method = new MethodClass();
+
+            //Array
+            ArrayList ar = new ArrayList();
+
+            // STEP 1)
+            for (int i = 0; i < ConstantValue.stock_count; i++)
+            {
+                var html = @"https://finance.naver.com/item/sise.naver?code=";
+                html = html + sj.company[i].ToString();
+
+                HtmlAgilityPack.HtmlWeb web = new HtmlAgilityPack.HtmlWeb();
+                var HtmlDoc = web.Load(html);
+
+                HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
+                HtmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
+                if (htmlNode == null || htmlNode_PER == null)
+                {
+                    return "err";
+                }
+
+                var data_marketcap = htmlNode.SelectSingleNode("td[1]").InnerText;
+                int data_MARKETCAP = call_method.CnvStringToInt(data_marketcap);
+
+                var data_per = htmlNode_PER.SelectSingleNode("td[1]").InnerText;
+                if ("N/A".Equals(data_per))
+                {
+                    data_per = "1000";
+                }
+                int data_PER = call_method.CnvStringToInt(data_per);
+
+                ar.Add(new C_Quant_Ver_1(sj.company[i], data_MARKETCAP, data_PER, 0, 0, sj.jongmok[i]));
+            }
+
+            //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
+            ar.Sort();
+
+            // STEP 2)
+            PerSortClass perSort = new PerSortClass();
+            PbrSortClass pbrSort = new PbrSortClass();
+            PcrSortClass pcrSort = new PcrSortClass();
+            
+            ar.Sort(0, 615, perSort);
+            ar.Sort(0, 150, pbrSort);
+            ar.Sort(0, 40, pcrSort);
+
+            C_Quant_Ver_1[] quant_Ver_1 = new C_Quant_Ver_1[20];
+
+            for (int i = 0; i < 20; i++)
+            {
+                
+                put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
+            }
+
+            int cnt = 0;
+            foreach(C_Quant_Ver_1 CQ in ar)
+            {
+                if (cnt == 20) break;
+
+                quant_Ver_1[cnt].s_CODE = CQ.s_CODE;
+                quant_Ver_1[cnt].s_MARKETCAP = CQ.s_MARKETCAP;
+                quant_Ver_1[cnt].s_PBR = CQ.s_PBR;
+                quant_Ver_1[cnt].s_PCR = CQ.s_PCR;
+                quant_Ver_1[cnt].s_PER = CQ.s_PER;
+                quant_Ver_1[cnt].s_NAME = CQ.s_NAME;
+            }
+
+            return put;
         }
     }
 }
