@@ -13,6 +13,22 @@ using App2_0325.Models;
 
 namespace App2_0325.ViewModels
 {
+    public class CompareList : IComparer
+    {
+        public CompareList() {}
+        public int Compare(object Obj1, object Obj2)
+        {
+            Quant_Ver_1 n1 = Obj1 as Quant_Ver_1;
+            Quant_Ver_1 n2 = Obj2 as Quant_Ver_1;
+
+            if( (n1 == null)  || (n2 == null)) 
+            {
+                throw new ApplicationException("Search Quant_Ver_1 Error");
+            }
+
+            return n1.s_PER.CompareTo(n2.s_PER);
+        }
+    }
 
     public class Global_days
     {
@@ -52,6 +68,27 @@ namespace App2_0325.ViewModels
         public int s_PER;
         public int s_PCR;
         public int s_PBR;
+        public string s_NAME;
+    }
+
+    public class C_Quant_Ver_1 : IComparable
+    {
+        public int s_CODE;
+        public int s_MARKETCAP;
+        public int s_PER;
+        public int s_PCR;
+        public int s_PBR;
+        public string s_NAME;
+
+        public int CompareTo_PER(object obj)
+        {
+            C_Quant_Ver_1 CQ = obj as C_Quant_Ver_1;
+            if(CQ == null)
+            {
+                throw new ApplicationException("Search CQ Error");
+            }
+            return s_PER.CompareTo(CQ.s_PER);
+        }
     }
 
     class Html_foreach
@@ -275,23 +312,36 @@ namespace App2_0325.ViewModels
         //https://finance.naver.com/item/sise.naver?code=
 
         // STEP 1) https://finance.naver.com/item/sise.naver?code=005380
-        //         Parsing loop in MarketCap
-        //         Array.Sort 사용 
+        //         Parsing loop in MarketCap, PER(?)
+        //
 
         // STEP 2) Qsort MarketCap
-        //         
+        //         Array.Sort 사용 (쉬운 배열은 상관없는데.. 조금 복잡해지니 이해가 조금 어려움)
+        //         Start<->End 자르는 비교는 아직 어렵네.. 뭔소리인지 모르겟어
+        //         일단 새롭게 생성하는 거로 하자...
 
-        // STEP 3) https://finance.naver.com/item/main.naver?code=005380
-        //         Parsing loop in PER
+        // STEP 3) Qsort PER(?)
+
+        // STEP 4) Result Setting..
+                 
+
         public string Parsing_Quent_Ver_1(float N1, float N2, float N3, float N4)
         {
             string put = "";
+            int MarketCap_Length = 615;
+            int PER_Length = (MarketCap_Length / 10) * 2.5;
             int[] temp = new int[ConstantValue.stock_count];
             Quant_Ver_1[] quant_Ver_1 = new Quant_Ver_1[ConstantValue.stock_count];
             sangjang sj = new sangjang();
             
             //Method Set
             MethodClass call_method = new MethodClass();
+            
+            //Compare Class
+            CompareList compareList = new CompareList();
+            
+            //Test for Sort of Class
+            C_Quant_Ver_1[] CQ = new C_Quant_Ver_1[ConstantValue.stock_count];
 
             // STEP 1)
             for (int i = 0; i < ConstantValue.stock_count; i++)
@@ -303,21 +353,38 @@ namespace App2_0325.ViewModels
                 var HtmlDoc = web.Load(html);
 
                 HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
-
-                if (htmlNode == null)
+                htmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
+                if (htmlNode == null || htmlNode_PER == null)
                 {
                     return "err";
                 }
-
+                
                 quant_Ver_1[i].s_CODE = sj.company[i];
-
+                quant_Ver_1[i].s_NAME = sj.jongmok[i];
                 var data_marketcap = htmlNode.SelectSingleNode("td[1]").InnerText;
                 quant_Ver_1[i].s_MARKETCAP = call_method.CnvStringToInt(data_marketcap);
                 temp[i] = quant_Ver_1[i].s_MARKETCAP;
+
+                var data_per = htmlNode_PER.SelectSingleNode("td[1]").InnerText;
+                if("N/A".Equals(data_per))
+                {
+                    data_per = 1000;
+                }
+                quant_Ver_1[i].s_PER = call_method.CnvStringToInt(data_per);
             }
 
             //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
             Array.Sort<Quant_Ver_1>(quant_Ver_1, (x, y) => x.s_MARKETCAP.CompareTo(y.s_MARKETCAP));
+
+            /* (1) */    
+            Array.Sort<Quant_Ver_1>(quant_Ver_1, ConstantValue.stock_count - MarketCap_Length, MarketCap_Length, compareList);
+        
+            int initLength = ConstantValue.stock_count-MarketCap_Length;
+            for(int i = initLength; i < initLength + PER_Length; i++)
+            {
+                put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
+            }
+
             return put;            
         }
     }
