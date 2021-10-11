@@ -102,6 +102,16 @@ namespace App2_0325.ViewModels
             }
         }
     }
+    public class MarketCapSortClass : IComparer
+    {
+        int IComparer.Compare(object x, object y)
+        {
+            C_Quant_Ver_1 left = x as C_Quant_Ver_1;
+            C_Quant_Ver_1 right = y as C_Quant_Ver_1;
+
+            return left.s_MARKETCAP.CompareTo(right.s_MARKETCAP);
+        }
+    }
 
     public class PerSortClass : IComparer
     {
@@ -444,15 +454,16 @@ namespace App2_0325.ViewModels
             ArrayList ar = new ArrayList();
 
             // STEP 1)
-            for (int i = 0; i < ConstantValue.stock_count; i++)
+            //for (int i = 0; i < sj.Number_public; i++)
+            for (int i = 0; i < 100; i++)
             {
                 var html = @"https://finance.naver.com/item/sise.naver?code=";
-                html = html + sj.company[i].ToString();
+                html = html + sj.company[i].ToString("D6");
 
                 HtmlAgilityPack.HtmlWeb web = new HtmlAgilityPack.HtmlWeb();
                 var HtmlDoc = web.Load(html);
 
-                HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
+                HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]");
                 HtmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
                 if (htmlNode == null || htmlNode_PER == null)
                 {
@@ -463,6 +474,7 @@ namespace App2_0325.ViewModels
                 int data_MARKETCAP = call_method.CnvStringToInt(data_marketcap);
 
                 var data_per = htmlNode_PER.SelectSingleNode("td[1]").InnerText;
+                data_per = data_per.Trim();
                 if ("N/A".Equals(data_per))
                 {
                     data_per = "1000";
@@ -473,27 +485,35 @@ namespace App2_0325.ViewModels
             }
 
             //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
-            ar.Sort();
+
+            //ar.Sort(); //why error?
 
             // STEP 2)
+            MarketCapSortClass marketCapSort = new MarketCapSortClass();
             PerSortClass perSort = new PerSortClass();
             PbrSortClass pbrSort = new PbrSortClass();
             PcrSortClass pcrSort = new PcrSortClass();
-            
-            ar.Sort(0, 615, perSort);
-            ar.Sort(0, 150, pbrSort);
-            ar.Sort(0, 40, pcrSort);
+
+            ar.Sort(0, 99, marketCapSort);
+            ar.Sort(0, 20, perSort);
+            //ar.Sort(0, 20, pbrSort);
+            //ar.Sort(0, 20, pcrSort);
 
             C_Quant_Ver_1[] quant_Ver_1 = new C_Quant_Ver_1[20];
-
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < quant_Ver_1.Length; i++)
             {
-                
-                put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
+                quant_Ver_1[i] = new C_Quant_Ver_1(0, 0, 0, 0, 0, "test");
             }
 
+            quant_Ver_1[0].s_CODE = 0;
+            quant_Ver_1[0].s_MARKETCAP = 0;
+            quant_Ver_1[0].s_PBR = 0;
+            quant_Ver_1[0].s_PCR = 0;
+            quant_Ver_1[0].s_PER = 0;
+            quant_Ver_1[0].s_NAME = "S";
+
             int cnt = 0;
-            foreach(C_Quant_Ver_1 CQ in ar)
+            foreach (C_Quant_Ver_1 CQ in ar)
             {
                 if (cnt == 20) break;
 
@@ -503,6 +523,13 @@ namespace App2_0325.ViewModels
                 quant_Ver_1[cnt].s_PCR = CQ.s_PCR;
                 quant_Ver_1[cnt].s_PER = CQ.s_PER;
                 quant_Ver_1[cnt].s_NAME = CQ.s_NAME;
+                cnt++;
+            }
+
+            for (int i = 0; i < 20; i++)
+            {
+
+                put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
             }
 
             return put;

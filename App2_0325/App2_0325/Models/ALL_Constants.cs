@@ -8,7 +8,7 @@ namespace App2_0325.Models
 {
     public class ALL_Constants
     {
-        public const int SJ_Number = 2403;
+        public const int SJ_Number = 2462;
         public const int Days = 60;
     }
 }
