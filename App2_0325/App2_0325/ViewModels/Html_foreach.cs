@@ -11,6 +11,7 @@ using System.Xml;
 using System.Net;
 
 using App2_0325.Models;
+using App2_0325.Data;
 
 namespace App2_0325.ViewModels
 {
@@ -157,7 +158,8 @@ namespace App2_0325.ViewModels
     }
     public class html_addr : INotifyPropertyChanged
     {
-
+        readonly DB_Manager DB_manager;
+        readonly DB_VER_1 DB_ver_1;
         public html_addr()
         {
 
@@ -366,78 +368,15 @@ namespace App2_0325.ViewModels
 
         //https://finance.naver.com/item/sise.naver?code=
 
-        // STEP 1) https://finance.naver.com/item/sise.naver?code=005380
-        //         Parsing loop in MarketCap, PER(?)
-        //
+        // STEP 1) Parsing Stock Data
+        // STEP 2) sort Array
+        // STEP 3) Result Setting..
 
-        // STEP 2) Qsort MarketCap
-        //         Array.Sort 사용 (쉬운 배열은 상관없는데.. 조금 복잡해지니 이해가 조금 어려움)
-        //         Start<->End 자르는 비교는 아직 어렵네.. 뭔소리인지 모르겟어
-        //         일단 새롭게 생성하는 거로 하자...
-
-        // STEP 3) Qsort PER(?)
-
-        // STEP 4) Result Setting..
-                 
-
-        public string Parsing_Quent_Ver_1(float N1, float N2, float N3, float N4)
+        public async Task<string> Quent_Ver_1(float N1, float N2, float N3, float N4, )
         {
             string put = "";
-            int MarketCap_Length = 615;
-            int PER_Length = (int)((MarketCap_Length / 10) * 2.5);
-            int[] temp = new int[ConstantValue.stock_count];
-            Quant_Ver_1[] quant_Ver_1 = new Quant_Ver_1[ConstantValue.stock_count];
-            sangjang sj = new sangjang();
-            
-            //Method Set
-            MethodClass call_method = new MethodClass();
-            
-            //Compare Class
-            CompareList compareList = new CompareList();
-
-            // STEP 1)
-            for (int i = 0; i < ConstantValue.stock_count; i++)
-            {
-                var html = @"https://finance.naver.com/item/sise.naver?code=";
-                html = html + sj.company[i].ToString();
-
-                HtmlAgilityPack.HtmlWeb web = new HtmlAgilityPack.HtmlWeb();
-                var HtmlDoc = web.Load(html);
-
-                HtmlNode htmlNode = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[12]/");
-                HtmlNode htmlNode_PER = HtmlDoc.DocumentNode.SelectSingleNode("//body/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr[10]");
-                if (htmlNode == null || htmlNode_PER == null)
-                {
-                    return "err";
-                }
-                
-                quant_Ver_1[i].s_CODE = sj.company[i];
-                quant_Ver_1[i].s_NAME = sj.jongmok[i];
-                var data_marketcap = htmlNode.SelectSingleNode("td[1]").InnerText;
-                quant_Ver_1[i].s_MARKETCAP = call_method.CnvStringToInt(data_marketcap);
-                temp[i] = quant_Ver_1[i].s_MARKETCAP;
-
-                var data_per = htmlNode_PER.SelectSingleNode("td[1]").InnerText;
-                if("N/A".Equals(data_per))
-                {
-                    
-                    data_per = "1000";
-                }
-                quant_Ver_1[i].s_PER = call_method.CnvStringToInt(data_per);
-            }
-
-            //https://stackoverflow.com/questions/12026344/how-to-use-array-sort-to-sort-an-array-of-structs-by-a-specific-element
-            Array.Sort<Quant_Ver_1>(quant_Ver_1, (x, y) => x.s_MARKETCAP.CompareTo(y.s_MARKETCAP));
-        
-            int initLength = ConstantValue.stock_count-MarketCap_Length;
-            for(int i = initLength; i < initLength + PER_Length; i++)
-            {
-                put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
-            }
-
-            return put;            
+            return put;
         }
-
         public string Parsing_C_Quent_Ver_1(float N1, float N2, float N3, float N4)
         {
             string put = "";
@@ -505,34 +444,41 @@ namespace App2_0325.ViewModels
                 quant_Ver_1[i] = new C_Quant_Ver_1(0, 0, 0, 0, 0, "test");
             }
 
-            quant_Ver_1[0].s_CODE = 0;
-            quant_Ver_1[0].s_MARKETCAP = 0;
-            quant_Ver_1[0].s_PBR = 0;
-            quant_Ver_1[0].s_PCR = 0;
-            quant_Ver_1[0].s_PER = 0;
-            quant_Ver_1[0].s_NAME = "S";
-
             int cnt = 0;
-            foreach (C_Quant_Ver_1 CQ in ar)
+            //foreach (C_Quant_Ver_1 CQ in ar)
+            //{
+            //    if (cnt == 20) break;
+            //    quant_Ver_1[cnt].s_CODE = CQ.s_CODE;
+            //    quant_Ver_1[cnt].s_MARKETCAP = CQ.s_MARKETCAP;
+            //    quant_Ver_1[cnt].s_PBR = CQ.s_PBR;
+            //    quant_Ver_1[cnt].s_PCR = CQ.s_PCR;
+            //    quant_Ver_1[cnt].s_PER = CQ.s_PER;
+            //    quant_Ver_1[cnt].s_NAME = CQ.s_NAME;
+            //    cnt++;
+            //}
+
+            //Enable Code?
+            foreach(C_Quant_Ver_1 CQ in ar)
             {
                 if (cnt == 20) break;
-
-                quant_Ver_1[cnt].s_CODE = CQ.s_CODE;
-                quant_Ver_1[cnt].s_MARKETCAP = CQ.s_MARKETCAP;
-                quant_Ver_1[cnt].s_PBR = CQ.s_PBR;
-                quant_Ver_1[cnt].s_PCR = CQ.s_PCR;
-                quant_Ver_1[cnt].s_PER = CQ.s_PER;
-                quant_Ver_1[cnt].s_NAME = CQ.s_NAME;
+                quant_Ver_1[cnt] = new C_Quant_Ver_1(CQ.s_CODE, CQ.s_MARKETCAP, CQ.s_PER, CQ.s_PCR, CQ.s_PBR, CQ.s_NAME);
                 cnt++;
             }
 
             for (int i = 0; i < 20; i++)
             {
-
                 put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
             }
 
             return put;
+        }
+        async public void DB_SAVE(object sender, EventArgs e, ref DB_VER_1 DB_Ver_1)
+        {
+            DB_Ver_1.Ver1_CODE = 0;
+            DB_Ver_1.Ver1_NAME = "TEST";
+
+            var test = await DB_manager.Add_Ver1(DB_Ver_1.Ver1_CODE, DB_Ver_1.Ver1_NAME);
+            return;
         }
     }
 }
