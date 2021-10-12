@@ -59,17 +59,19 @@ namespace App2_0325
         //STEP 3) REST API send to My Server and My App
         async private void Button_Clicked_Search(object sender, EventArgs e)
         {
+            html_addr HA = (html_addr)BindingContext;
+
             /*21-02-12*/
             EDI1.Text = "";
              
-            EDI1.Text += await Quent_Ver_1(0,0,0,0);
+            EDI1.Text += await HA.Quent_Ver_1(0,0,0,0);
        
             AI_Learn_flg = true;
             chart_erase = true;
         }
 
         //STEP 1) DB SAVE
-        private void Button_Clicked_DB_SAVE(object sender, EventArgs e)
+        async private void Button_Clicked_DB_SAVE(object sender, EventArgs e)
         {
             bool answer = await DisplayAlert("Question?", "Would you save this Data?", "Yes", "No");
             html_addr HA = (html_addr)BindingContext;

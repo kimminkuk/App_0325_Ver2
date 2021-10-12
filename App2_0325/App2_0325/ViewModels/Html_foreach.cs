@@ -372,7 +372,7 @@ namespace App2_0325.ViewModels
         // STEP 2) sort Array
         // STEP 3) Result Setting..
 
-        public async Task<string> Quent_Ver_1(float N1, float N2, float N3, float N4, )
+        public async Task<string> Quent_Ver_1(float N1, float N2, float N3, float N4)
         {
             string put = "";
             return put;
@@ -393,8 +393,8 @@ namespace App2_0325.ViewModels
             ArrayList ar = new ArrayList();
 
             // STEP 1)
-            //for (int i = 0; i < sj.Number_public; i++)
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < sj.Number_public; i++)
+            //for (int i = 0; i < 100; i++)
             {
                 var html = @"https://finance.naver.com/item/sise.naver?code=";
                 html = html + sj.company[i].ToString("D6");
@@ -445,19 +445,6 @@ namespace App2_0325.ViewModels
             }
 
             int cnt = 0;
-            //foreach (C_Quant_Ver_1 CQ in ar)
-            //{
-            //    if (cnt == 20) break;
-            //    quant_Ver_1[cnt].s_CODE = CQ.s_CODE;
-            //    quant_Ver_1[cnt].s_MARKETCAP = CQ.s_MARKETCAP;
-            //    quant_Ver_1[cnt].s_PBR = CQ.s_PBR;
-            //    quant_Ver_1[cnt].s_PCR = CQ.s_PCR;
-            //    quant_Ver_1[cnt].s_PER = CQ.s_PER;
-            //    quant_Ver_1[cnt].s_NAME = CQ.s_NAME;
-            //    cnt++;
-            //}
-
-            //Enable Code?
             foreach(C_Quant_Ver_1 CQ in ar)
             {
                 if (cnt == 20) break;
@@ -472,12 +459,12 @@ namespace App2_0325.ViewModels
 
             return put;
         }
-        async public void DB_SAVE(object sender, EventArgs e, ref DB_VER_1 DB_Ver_1)
+        public void DB_SAVE(object sender, EventArgs e, ref DB_VER_1 DB_Ver_1)
         {
             DB_Ver_1.Ver1_CODE = 0;
             DB_Ver_1.Ver1_NAME = "TEST";
 
-            var test = await DB_manager.Add_Ver1(DB_Ver_1.Ver1_CODE, DB_Ver_1.Ver1_NAME);
+            var test = DB_manager.Add_Ver1(DB_Ver_1.Ver1_CODE, DB_Ver_1.Ver1_NAME);
             return;
         }
     }
