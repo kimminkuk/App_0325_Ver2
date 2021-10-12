@@ -4,9 +4,8 @@ Reading 'can do! Quant Investing Books' and Turning Investing Methods into Apps
 # Update Plan #
 1. Quant Ver 1 (80%)
 
-   * Market Cap Serch
-   
-   * PER\n
+   * Market Cap Search
+   * PER
    
    * PBR
    
