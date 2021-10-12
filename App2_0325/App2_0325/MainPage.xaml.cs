@@ -11,6 +11,7 @@ using Xamarin.Forms;
 //namespace
 using App2_0325.ViewModels;
 using App2_0325.Models;
+using App2_0325.Data;
 
 //drawing add
 using SkiaSharp;
@@ -27,8 +28,8 @@ namespace App2_0325
     [DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-//        MethodClass Mt = new MethodClass();
-        const int _days = 60;
+        DB_VER_1 DB_Ver_1 = new DB_VER_1();
+
         const int _days_ex = 120;
         stock_[] stock = new stock_[_days_ex];
         bool AI_Learn_flg = false;
@@ -52,66 +53,46 @@ namespace App2_0325
             
         }
 
-        //https://ssl.pstatic.net/imgfinance/chart/item/candle/day/005380.png
-        private void Button_Clicked_Search(object sender, EventArgs e)
+        
+        //STEP 1) Select Quant Search
+        //STEP 2) MarketCap, PER, PBR, PCR Parameter Get
+        //STEP 3) REST API send to My Server and My App
+        async private void Button_Clicked_Search(object sender, EventArgs e)
         {
-            /*21-02-13*/
-            html_addr HA = (html_addr)BindingContext;
-            StockCodeSearch codeSearch = new StockCodeSearch();
             /*21-02-12*/
-            // enter 제거 (string.trim() -> 문자열 앞,뒤 공백 제거)
-            if (String.IsNullOrEmpty(DATA.Text.Trim())) { EDI1.Text = "ERR"; return; }
-            string search_data = DATA.Text.ToString().Trim();
             EDI1.Text = "";
-
-            /*21-02-13*/
-            jusik_code = codeSearch.code_search(search_data);
-
-            if(jusik_code.Equals("STOCK_CODE_ERROR")) //Err Finish
-            {
-                EDI1.Text = "ERR";
-                return; //finish
-            }
-            //Stock Image
-            //Default Day
-            HA.html_png_parsing(jusik_code, Kind_Constants.kinds_day);
-
-            
-            EDI1.Text = HA.html_data_parsing(jusik_code,  ref stock, Kind_Constants.days_60, Kind_Constants.version_2);
-            EDI1.Text += HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_50, Kind_Constants.version_2);
-            EDI1.Text += HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_40, Kind_Constants.version_2);
-            EDI1.Text += HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_30, Kind_Constants.version_2);
-            EDI1.Text += HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_20, Kind_Constants.version_2);
-            EDI1.Text += HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_10, Kind_Constants.version_2);
-
-
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_70, Kind_Constants.version_2);
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_80, Kind_Constants.version_2);
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_90, Kind_Constants.version_2);
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_100, Kind_Constants.version_2);
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_110, Kind_Constants.version_2);
-            HA.html_data_parsing(jusik_code, ref stock, Kind_Constants.days_120, Kind_Constants.version_2);
-
-
-            //SKPaint(Chart)
-            //            canvasView.InvalidateSurface();
+             
+            EDI1.Text += await Quent_Ver_1(0,0,0,0);
+       
             AI_Learn_flg = true;
             chart_erase = true;
+        }
+
+        //STEP 1) DB SAVE
+        private void Button_Clicked_DB_SAVE(object sender, EventArgs e)
+        {
+            bool answer = await DisplayAlert("Question?", "Would you save this Data?", "Yes", "No");
+            html_addr HA = (html_addr)BindingContext;
+            
+            //HA.DB_SAVE(sender, e, ref DB_Ver_1);
+
+            if(answer)
+            {
+                HA.DB_SAVE(sender, e, ref DB_Ver_1);
+            }
         }
 
         private void Button_Clicked_erase(object sender, EventArgs e)
         {
             html_addr HA = (html_addr)BindingContext;
             EDI1.Text = "CLEAR";
-            HA.html_png_erase(); // Image Binding Clear
+            HA.html_png_erase();
+
             AI_Learn_flg = false;
             chart_erase = false;
             CLEAR stk_clr = new CLEAR();
 
             stk_clr.CLEAR_STOCK(ref stock, Kind_Constants.test_120days);
-
-            //SKPaint(Chart)
-//            canvasView.InvalidateSurface();
         }
 
         //60days Learn
@@ -153,125 +134,6 @@ namespace App2_0325
             EDI1.Text = "종가 예측: " + (int)Learn_Result;
         }
 
-        private void canvasView_PaintSurface(object sender, SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
-        {
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
-
-            canvas.Clear(SKColors.White);
-            
-            int width = e.Info.Width;
-            int height = e.Info.Height;
-
-            SKBitmap sKBitmap = new SKBitmap(width, height);
-
-            SKPoint[] points = new SKPoint[Global_days._days];
-
-            int new_width = width / Global_days._days;
-            //int new_height = height
-
-            //for (int i = GG._days - 1; i > 0; i--)
-            //{
-            //    points[i] = new SKPoint(i* new_width, stk_v2[i].s_date);
-            //} 
-
-            // 20/12/14 code add
-            // add for High Price to Height 
-            int temp_height = 0;
-            for (int i = 0; i < Global_days._days; i++ )
-            {
-                if (temp_height < stock[i].s_dhp_int )
-                {
-                    temp_height = stock[i].s_dhp_int;
-                }
-            }
-            //add for Low Price to Height
-            int temp_height_low = stock[0].s_dlp_int;
-            for (int i = 0; i < Global_days._days; i++)
-            {
-                if (temp_height_low > stock[i].s_dlp_int)
-                {
-                    temp_height_low = stock[i].s_dlp_int;
-                }
-            } 
-#if false
-            for (int i = 0; i < GG._days; i++)
-            {
-                float new_height = (stk_v2[i].s_dcp_int / (float)stk_v2[i].s_dhp_int) * height;
-                points[i] = new SKPoint(i * new_width, new_height);
-            }
-#endif
-            for (int i = 0; i < Global_days._days; i++)
-            {
-                float new_height = (float)stock[i].s_dcp_int;
-                points[i] = new SKPoint(i, new_height);
-            }
-
-            for (int i = 1; i < Global_days._days; i++)
-            {
-                //canvas
-                
-                canvas.DrawLine(points[i - 1], points[i], blackFillPaint);
-            }
-
-            Point[] point_oxy = new Point[Global_days._days];
-            
-
-             //OxyPlot
-             var model = new PlotModel
-             {
-                 Title = "Line Title",
-                 PlotType = PlotType.XY
-             };
-            
-             //X
-             model.Axes.Add(new LinearAxis
-             {
-                 Title = "Date",
-                 Position = AxisPosition.Bottom
-             });
-            
-             //Y
-             model.Axes.Add(new LinearAxis
-             {
-                 Title = "Close Price",
-                 Position = AxisPosition.Left
-             });
-            
-             var Points_Oxy = new List<DataPoint>();
-
-            //CreateLine();
-
-            var series2 = new OxyPlot.Series.LineSeries
-            {
-                LineStyle = LineStyle.None,
-                MarkerFill = OxyColors.Transparent,
-                MarkerStroke = OxyColors.Black,
-                MarkerStrokeThickness = 2
-            };
-
-
-            for (int i = 0; i < Global_days._days; i++)
-            {
-                series2.Points.Add(new DataPoint(stock[i].s_date, stock[i].s_dcp_int/100));
-            }
-            series2.Smooth = true;
-            model.Series.Add(series2);
-            
-
-        }
-
-//        private void CreateLine()
-//        {
-//            var myModel = new PlotModel { Title = "Example 2" };
-//            myModel.Series.Add
-//                (
-//                new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)")
-//                );
-//
-//            this.PlotChart.Model = myModel;
-//            
-//        }
         private void Button_Clicked_Save(object sender, EventArgs e)
         {
 
