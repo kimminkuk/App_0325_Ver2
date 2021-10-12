@@ -17,4 +17,5 @@ Reading 'can do! Quant Investing Books' and Turning Investing Methods into Apps
    - MSSQL or MYSQL SQL QUERY Coding
 
 
-EX) Calculating the top 25% of PER, PBR, PCR, PSR among the bottom 25% of companies by market capitalization
+# EX 
+1. Calculating the top 25% of PER, PBR, PCR, PSR among the bottom 25% of companies by market capitalization
