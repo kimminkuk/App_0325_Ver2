@@ -6,13 +6,9 @@ Reading 'can do! Quant Investing Books' and Turning Investing Methods into Apps
 
    * Market Cap Search
    * PER
-   
    * PBR
-   
    * PCR
-   
    * PSR
-   
    
 2. DB Page UPDATE (20%)
  
