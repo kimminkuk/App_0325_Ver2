@@ -4,15 +4,15 @@ Reading 'can do! Quant Investing Books' and Turning Investing Methods into Apps
 # Update Plan #
 1. Quant Ver 1 (80%)
 
-   1-1) Market Cap Serch
+   * Market Cap Serch
    
-   1-2) PER\n
+   * PER\n
    
-   1-3) PBR
+   * PBR
    
-   1-4) PCR
+   * PCR
    
-   1-5) PSR
+   * PSR
    
    
 2. DB Page UPDATE (20%)
