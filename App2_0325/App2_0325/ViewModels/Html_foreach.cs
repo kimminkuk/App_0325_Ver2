@@ -371,6 +371,8 @@ namespace App2_0325.ViewModels
         // STEP 1) Parsing Stock Data
         // STEP 2) sort Array
         // STEP 3) Result Setting..
+        // But... this Parsing Time is long..long.. that i want Server Coding.. Every Day Initial Set Code
+        // 
 
         public async Task<string> Quent_Ver_1(float N1, float N2, float N3, float N4)
         {
@@ -419,6 +421,12 @@ namespace App2_0325.ViewModels
                     data_per = "1000";
                 }
                 int data_PER = call_method.CnvStringToInt(data_per);
+                
+                //Update: PER < 0 -> OUT
+                if (data_PER <= 0) 
+                {
+                    data_PER = 1000; //OUT!!
+                }
 
                 ar.Add(new C_Quant_Ver_1(sj.company[i], data_MARKETCAP, data_PER, 0, 0, sj.jongmok[i]));
             }
