@@ -465,6 +465,10 @@ namespace App2_0325.ViewModels
                 put += "종목: " + quant_Ver_1[i].s_NAME + Environment.NewLine;
             }
 
+            int cnt_ = 10; //Stock Research Count
+            //Ref
+            DB_SAVE_(ref quant_Ver_1, cnt_);
+
             return put;
         }
         public void DB_SAVE(object sender, EventArgs e, ref DB_VER_1 DB_Ver_1)
@@ -473,6 +477,23 @@ namespace App2_0325.ViewModels
             DB_Ver_1.Ver1_NAME = "TEST";
 
             var test = DB_manager.Add_Ver1(DB_Ver_1.Ver1_CODE, DB_Ver_1.Ver1_NAME);
+            return;
+        }
+
+        public void DB_SAVE_(ref C_Quant_Ver_1[] CQ, int cnt_)
+        {
+            DB_VER_1[] DB_Ver_1 = new DB_VER_1[cnt_];
+            foreach(C_Quant_Ver_1 CQ_ in CQ) 
+            {
+                var test = DB_manager.Add_Ver1(CQ_.s_CODE, CQ_.s_NAME);
+            }
+        
+            C_Quant_Ver_1[] temp_CQ = new C_Quant_Ver_1[cnt_];
+            
+            for(int i = 0; i < cnt_; i++)
+            {
+                var test = DB_manager.Add_Ver1(CQ[i].s_CODE, CQ[i].s_NAME);
+            }
             return;
         }
     }
